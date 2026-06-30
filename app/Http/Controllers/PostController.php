@@ -6,6 +6,7 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -70,11 +71,24 @@ public function index(Request $request): View
         $validated = $request->validate([
             'title'   => 'required|string|max:200',
             'content' => 'required|string',
+            'images.*'  => 'nullable|image|max:200',   
+            ], [
+            'images.*.image' => '이미지 파일만 올릴 수 있어요.',
+            'images.*.max'   => '사진은 한 장당 5MB 이하만 가능해요.',
         ]);
 
         // 2. 현재 로그인한 유저의 게시글로 저장
-        $request->user()->posts()->create($validated);
-
+        $post = $request->user()->posts()->create($validated);
+        
+    if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $image) {
+            $path = $image->store('attachments', 'public');
+            $post->attachments()->create([
+                'path'          => $path,
+                'original_name' => $image->getClientOriginalName(),
+            ]);
+        }
+    }
         // 3. 목록 페이지로 이동
         return redirect()->route('posts.index')
                          ->with('success', '게시글이 작성되었습니다!');
@@ -112,14 +126,26 @@ public function index(Request $request): View
         $this->authorize('update', $post);
         // 1. 유효성 검사
         $validated = $request->validate([
-            'title'   => 'required|string|max:200',
-            'content' => 'required|string',
+            'title'     => 'required|string|max:200',
+            'content'   => 'required|string',
+            'images.*'  => 'nullable|image|max:5120',
         ]);
 
         // 2. 수정
         $post->update($validated);
 
-        // 3. 상세 페이지로 이동
+        // 3. 새로 첨부된 사진이 있으면 추가 저장 (store와 동일한 패턴)
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('attachments', 'public');
+                $post->attachments()->create([
+                    'path'          => $path,
+                    'original_name' => $image->getClientOriginalName(),
+                ]);
+            }
+        }
+
+        // 4. 상세 페이지로 이동
         return redirect()->route('posts.show', $post)
                          ->with('success', '게시글이 수정되었습니다!');
     }
@@ -129,10 +155,15 @@ public function index(Request $request): View
      */
     public function destroy(Post $post): RedirectResponse
     {
-         $this->authorize('delete', $post); 
+         $this->authorize('delete', $post);
 
-        $post->delete();
-        
+        // 실제 파일 먼저 삭제 (cascade는 DB 행만 지우므로 직접 처리)
+        foreach ($post->attachments as $attachment) {
+            Storage::disk('public')->delete($attachment->path);
+        }
+
+        $post->delete();   // 글 삭제 → attachments 행은 cascade로 자동 삭제
+
         return redirect()->route('posts.index')
                          ->with('success', '게시글이 삭제되었습니다!');
     }

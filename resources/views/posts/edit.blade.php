@@ -10,7 +10,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
-                    <form action="{{ route('posts.update', $post) }}" method="POST">
+                    <form action="{{ route('posts.update', $post) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
@@ -39,6 +39,34 @@
                                       rows="12"
                                       class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">{{ old('content', $post->content) }}</textarea>
                             @error('content')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- 현재 첨부된 사진 --}}
+                        @if($post->attachments->count() > 0)
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    현재 사진
+                                </label>
+                                <div class="flex flex-wrap gap-3">
+                                    @foreach($post->attachments as $attachment)
+                                        <img src="{{ asset('storage/' . $attachment->path) }}"
+                                             alt="{{ $attachment->original_name }}"
+                                             class="h-24 w-24 object-cover rounded-md border border-gray-200">
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- 사진 추가 --}}
+                        <div class="mb-6">
+                            <label for="images" class="block text-sm font-medium text-gray-700 mb-2">
+                                사진 추가
+                            </label>
+                            <input type="file" name="images[]" id="images" multiple accept="image/*"
+                                   class="block w-full text-sm text-gray-700">
+                            @error('images.*')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>

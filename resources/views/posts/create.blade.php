@@ -10,7 +10,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
-                    <form action="{{ route('posts.store') }}" method="POST">
+                    <form action="{{ route('posts.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
                         {{-- 제목 --}}
@@ -44,6 +44,18 @@
                             @enderror
                         </div>
 
+                                                {{-- 첨부 이미지 --}}
+                        <div class="mb-6">
+                            <label for="images" class="block text-sm font-medium text-gray-700 mb-2">
+                                사진 첨부
+                            </label>
+                            <input type="file" name="images[]" id="images" multiple accept="image/*"
+                                class="block w-full text-sm text-gray-700">
+                            @error('images.*')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        
                         {{-- 버튼 --}}
                         <div class="flex items-center justify-end space-x-3 pt-4 border-t">
                             <a href="{{ route('posts.index') }}" 
