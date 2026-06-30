@@ -34,6 +34,17 @@
                         {{ $post->content }}
                     </div>
 
+            {{-- 첨부 이미지 --}}
+            @if($post->attachments->count() > 0)
+                <div class="mb-8 space-y-4">
+                    @foreach($post->attachments as $attachment)
+                        <img src="{{ asset('storage/' . $attachment->path) }}"
+                            alt="{{ $attachment->original_name }}"
+                            class="max-w-full rounded-lg shadow">
+                    @endforeach
+                </div>
+            @endif
+
                   <div class="flex items-center justify-between pt-4 border-t border-gray-200">
     {{-- 왼쪽: 목록으로 --}}
     <a href="{{ route('posts.index') }}" 
