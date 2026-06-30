@@ -4,10 +4,12 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\LikeController;
+use App\Http\Controllers\CommentLikeController;
 
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('posts.index');
 });
 
 Route::get('/dashboard', function () {
@@ -28,6 +30,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])
          ->name('comments.destroy');
 
+    Route::post('/posts/{post}/like', [LikeController::class, 'toggle'])
+    ->name('posts.like');    
+
+    Route::post('/comments/{comment}/like', [CommentLikeController::class, 'toggle'])
+     ->name('comments.like');
 });
 
 require __DIR__.'/auth.php';

@@ -34,4 +34,16 @@ class Comment extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+        // 댓글의 좋아요들
+    public function likes()
+    {
+        return $this->hasMany(CommentLike::class);
+    }
+
+    // 특정 사용자가 이 댓글에 좋아요 했는지
+    public function isLikedBy(User $user)
+    {
+        return $this->likes()->where('user_id', $user->id)->exists();
+    }
 }

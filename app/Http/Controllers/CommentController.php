@@ -21,6 +21,7 @@ class CommentController extends Controller
 
         // 2. 현재 로그인한 유저의 댓글로 저장
         $post->comments()->create([
+            'content' => trim($request->content),
             'user_id' => $request->user()->id,
             'content' => $validated['content'],
         ]);

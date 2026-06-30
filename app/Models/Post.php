@@ -54,4 +54,23 @@ class Post extends Model
         });
     }
 
+
+
+        // 좋아요들 (한 글에 여러 좋아요)
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    // 좋아요 한 사람들 (User 들)
+    public function likedBy()
+    {
+        return $this->belongsToMany(User::class, 'likes');
+    }
+
+    // 특정 사용자가 좋아요 했는지 확인
+    public function isLikedBy(User $user)
+    {
+        return $this->likes()->where('user_id', $user->id)->exists();
+    }
 }

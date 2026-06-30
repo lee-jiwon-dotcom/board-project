@@ -40,12 +40,22 @@ class User extends Authenticatable
         return $this->hasMany(Post::class);
     }
 
-        /**
- * 👇 추가! 유저가 쓴 댓글들
- */
-public function comments(): HasMany
-{
-    return $this->hasMany(Comment::class);
-}
+            /**
+     * 👇 추가! 유저가 쓴 댓글들
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
 
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
+
+        public function commentLikes()
+    {
+        return $this->hasMany(CommentLike::class);
+    }
 }
