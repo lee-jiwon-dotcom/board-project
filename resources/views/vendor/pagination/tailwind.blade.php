@@ -29,17 +29,17 @@
 
             <div>
                 <p class="text-sm text-gray-700 leading-5 dark:text-gray-600">
-                    {!! __('총') !!}
+                    {!! __('全') !!}
+                    <span class="font-medium">{{ $paginator->total() }}</span>
+                    {!! __('件中') !!}
                     @if ($paginator->firstItem())
                         <span class="font-medium">{{ $paginator->firstItem() }}</span>
-                        {!! __('~') !!}
+                        {!! __('〜') !!}
                         <span class="font-medium">{{ $paginator->lastItem() }}</span>
                     @else
                         {{ $paginator->count() }}
                     @endif
-                    {!! __('중') !!}
-                    <span class="font-medium">{{ $paginator->total() }}</span>
-                    {!! __('개') !!}
+                    {!! __('件を表示') !!}
                 </p>
             </div>
 

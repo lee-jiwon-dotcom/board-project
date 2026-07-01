@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            게시글 수정
+            写真を編集
         </h2>
     </x-slot>
 
@@ -14,13 +14,13 @@
                         @csrf
                         @method('PUT')
 
-                        {{-- 제목 --}}
+                        {{-- タイトル --}}
                         <div class="mb-6">
                             <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
-                                제목 <span class="text-red-500">*</span>
+                                タイトル <span class="text-red-500">*</span>
                             </label>
-                            <input type="text" 
-                                   name="title" 
+                            <input type="text"
+                                   name="title"
                                    id="title"
                                    value="{{ old('title', $post->title) }}"
                                    class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
@@ -29,12 +29,12 @@
                             @enderror
                         </div>
 
-                        {{-- 내용 --}}
+                        {{-- 内容 --}}
                         <div class="mb-6">
                             <label for="content" class="block text-sm font-medium text-gray-700 mb-2">
-                                내용 <span class="text-red-500">*</span>
+                                内容 <span class="text-red-500">*</span>
                             </label>
-                            <textarea name="content" 
+                            <textarea name="content"
                                       id="content"
                                       rows="12"
                                       class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">{{ old('content', $post->content) }}</textarea>
@@ -43,11 +43,11 @@
                             @enderror
                         </div>
 
-                        {{-- 현재 첨부된 사진 --}}
+                        {{-- 現在の写真 --}}
                         @if($post->attachments->count() > 0)
                             <div class="mb-6">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    현재 사진
+                                    現在の写真
                                 </label>
                                 <div class="flex flex-wrap gap-3">
                                     @foreach($post->attachments as $attachment)
@@ -59,10 +59,10 @@
                             </div>
                         @endif
 
-                        {{-- 사진 추가 --}}
+                        {{-- 写真を追加 --}}
                         <div class="mb-6">
                             <label for="images" class="block text-sm font-medium text-gray-700 mb-2">
-                                사진 추가
+                                写真を追加
                             </label>
                             <input type="file" name="images[]" id="images" multiple accept="image/*"
                                    class="block w-full text-sm text-gray-700">
@@ -71,15 +71,15 @@
                             @enderror
                         </div>
 
-                        {{-- 버튼 --}}
+                        {{-- ボタン --}}
                         <div class="flex items-center justify-end space-x-3 pt-4 border-t">
-                            <a href="{{ route('posts.show', $post) }}" 
+                            <a href="{{ route('posts.show', $post) }}"
                                class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none transition">
-                                취소
+                                キャンセル
                             </a>
-                            <button type="submit" 
+                            <button type="submit"
                                     class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:outline-none transition">
-                                수정하기
+                                更新する
                             </button>
                         </div>
                     </form>

@@ -21,14 +21,13 @@ class CommentController extends Controller
 
         // 2. 현재 로그인한 유저의 댓글로 저장
         $post->comments()->create([
-            'content' => trim($request->content),
+            'content' => preg_replace('/\A[\s\x{3000}]+|[\s\x{3000}]+\z/u', '', $request->content),
             'user_id' => $request->user()->id,
-            'content' => $validated['content'],
         ]);
 
         // 3. 게시글 상세로 돌아가기
         return redirect()->route('posts.show', $post)
-                         ->with('success', '댓글이 작성되었습니다!');
+                         ->with('success', 'コメントを投稿しました！');
     }
 
     /**
@@ -43,6 +42,6 @@ class CommentController extends Controller
         $comment->delete();
 
         return redirect()->route('posts.show', $postId)
-                         ->with('success', '댓글이 삭제되었습니다!');
+                         ->with('success', 'コメントを削除しました！');
     }
 }

@@ -16,9 +16,9 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    {{-- 👇 추가! 게시판 메뉴 --}}
+                    {{-- ギャラリーメニュー --}}
                        <x-nav-link :href="route('posts.index')" :active="request()->routeIs('posts.*')">
-                           {{ __('게시판') }}
+                           {{ __('ギャラリー') }}
                          </x-nav-link>
                 </div>
             </div>
@@ -76,9 +76,9 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-                {{-- 👇 추가! --}}
+                {{-- ギャラリーメニュー（レスポンシブ） --}}
     <x-responsive-nav-link :href="route('posts.index')" :active="request()->routeIs('posts.*')">
-        {{ __('게시판') }}
+        {{ __('ギャラリー') }}
     </x-responsive-nav-link>
 
         </div>

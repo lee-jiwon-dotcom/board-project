@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Category;
 
 class PostController extends Controller
 {
@@ -39,27 +40,32 @@ class PostController extends Controller
 public function index(Request $request): View
 {
     $search = $request->input('search');
-    
-    $posts = Post::with('user')
-                 ->search($search)          // 👈 Scope 사용!
-                 ->latest()
-                 ->paginate(10)
-                 ->withQueryString();
-    
-    return view('posts.index', compact('posts', 'search'));
+    $categorySlug = $request->input('category');   // ?category=sunset
+
+    $query = Post::with(['user', 'category', 'attachments'])  // 미리 로드
+                 ->search($search)
+                 ->latest();
+
+    // 카테고리 필터: slug가 들어오면 그 카테고리 글만
+    if ($categorySlug) {
+        $category = Category::where('slug', $categorySlug)->first();
+        if ($category) {
+            $query->where('category_id', $category->id);
+        }
+    }
+
+    $posts = $query->paginate(12)->withQueryString();
+    $categories = Category::all();   // 사이드바용
+
+    return view('posts.index', compact('posts', 'search', 'categories', 'categorySlug'));
 }
-
-
-
-
-
-
     /**
      * 게시글 작성 폼 (GET /posts/create)
      */
     public function create(): View
     {
-        return view('posts.create');
+        $categories = Category::all();
+        return view('posts.create', compact('categories'));
     }
 
     /**
@@ -68,14 +74,19 @@ public function index(Request $request): View
     public function store(Request $request): RedirectResponse
     {
         // 1. 유효성 검사
-        $validated = $request->validate([
-            'title'   => 'required|string|max:200',
-            'content' => 'required|string',
-            'images.*'  => 'nullable|image|max:200',   
-            ], [
-            'images.*.image' => '이미지 파일만 올릴 수 있어요.',
-            'images.*.max'   => '사진은 한 장당 5MB 이하만 가능해요.',
-        ]);
+       $validated = $request->validate([
+        'title'       => 'required|string|max:200',
+        'content'     => 'nullable|string',
+        'category_id' => 'required|exists:categories,id',
+        'images'      => 'required|array|min:1',
+        'images.*'    => 'image|max:5120',
+    ], [
+        'category_id.required' => 'カテゴリーを選択してください。',
+        'title.required'       => 'タイトルを入力してください。',
+        'images.required'      => '写真を最低1枚アップロードしてください。',
+        'images.*.image'       => '画像ファイルのみアップロードできます。',
+        'images.*.max'         => '写真は1枚あたり5MB以下にしてください。',
+    ]);
 
         // 2. 현재 로그인한 유저의 게시글로 저장
         $post = $request->user()->posts()->create($validated);
@@ -91,7 +102,7 @@ public function index(Request $request): View
     }
         // 3. 목록 페이지로 이동
         return redirect()->route('posts.index')
-                         ->with('success', '게시글이 작성되었습니다!');
+                         ->with('success', '写真を投稿しました！');
     }
 
     /**
@@ -103,7 +114,7 @@ public function index(Request $request): View
     $post->increment('view_count');
     
     // 댓글 + 댓글 작성자 미리 로드 (N+1 방지!)
-    $post->load(['comments.user']);
+    $post->load(['comments.user', 'category']);
     
     return view('posts.show', compact('post'));
 }
@@ -127,7 +138,7 @@ public function index(Request $request): View
         // 1. 유효성 검사
         $validated = $request->validate([
             'title'     => 'required|string|max:200',
-            'content'   => 'required|string',
+            'content'   => 'nullable|string',
             'images.*'  => 'nullable|image|max:5120',
         ]);
 
@@ -147,7 +158,7 @@ public function index(Request $request): View
 
         // 4. 상세 페이지로 이동
         return redirect()->route('posts.show', $post)
-                         ->with('success', '게시글이 수정되었습니다!');
+                         ->with('success', '写真を更新しました！');
     }
 
     /**
@@ -165,6 +176,6 @@ public function index(Request $request): View
         $post->delete();   // 글 삭제 → attachments 행은 cascade로 자동 삭제
 
         return redirect()->route('posts.index')
-                         ->with('success', '게시글이 삭제되었습니다!');
+                         ->with('success', '写真を削除しました！');
     }
 }
