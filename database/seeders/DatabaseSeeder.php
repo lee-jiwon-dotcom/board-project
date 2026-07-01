@@ -11,19 +11,17 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. 테스트 유저 5명 생성
-        User::factory(5)->create();
-        
-        // 2. 게시글 30개 생성 (랜덤 작성자)
-        Post::factory(30)->create();
-        
-        // 3. 댓글 100개 생성 (랜덤 작성자, 랜덤 게시글)
-        Comment::factory(100)->create();
-        
-        // 4. 특정 테스트 유저 만들기 (선택)
+        // 카테고리 먼저! (노을/사람)
+        $this->call(CategorySeeder::class);
+
+        // 로그인용 테스트 유저 하나
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        // 가짜 게시글/댓글은 갤러리엔 안 맞으니 잠시 꺼둠
+        // Post::factory(30)->create();
+        // Comment::factory(100)->create();
     }
 }

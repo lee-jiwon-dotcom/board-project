@@ -20,6 +20,7 @@ class Post extends Model
         'user_id',
         'title',
         'content',
+        'category_id',
     ];
 
     /**
@@ -72,5 +73,15 @@ class Post extends Model
     public function isLikedBy(User $user)
     {
         return $this->likes()->where('user_id', $user->id)->exists();
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(Attachment::class);
+    }
+
+    public function category(): BelongsTo
+    {
+    return $this->belongsTo(Category::class);
     }
 }

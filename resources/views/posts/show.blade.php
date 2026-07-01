@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            게시글 상세
+            写真の詳細
         </h2>
     </x-slot>
 
@@ -14,9 +14,15 @@
                 </div>
             @endif
 
-            {{-- 게시글 영역 --}}
+            {{-- 投稿エリア --}}
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6 text-gray-900">
+
+                    @if($post->category)
+                        <span class="inline-block px-3 py-1 mb-3 text-xs font-medium bg-indigo-50 text-indigo-700 rounded-full">
+                            {{ $post->category->name }}
+                        </span>
+                    @endif
 
                     <h1 class="text-2xl font-bold text-gray-900 mb-4">
                         {{ $post->title }}
@@ -27,23 +33,34 @@
                         <span class="mx-2 text-gray-300">|</span>
                         <span>{{ $post->created_at->format('Y-m-d H:i') }}</span>
                         <span class="mx-2 text-gray-300">|</span>
-                        <span>조회 {{ $post->view_count }}</span>
+                        <span>閲覧 {{ $post->view_count }}</span>
                     </div>
 
-                    <div class="prose max-w-none mb-8 text-gray-700 leading-relaxed whitespace-pre-wrap min-h-[200px]">
-                        {{ $post->content }}
-                    </div>
+                    @if($post->content)
+                        <div class="prose max-w-none mb-8 text-gray-700 leading-relaxed whitespace-pre-wrap">{{ $post->content }}</div>
+                    @endif
+
+            {{-- 添付画像 --}}
+            @if($post->attachments->count() > 0)
+                <div class="mb-8 space-y-4">
+                    @foreach($post->attachments as $attachment)
+                        <img src="{{ asset('storage/' . $attachment->path) }}"
+                            alt="{{ $attachment->original_name }}"
+                            class="max-w-full rounded-lg shadow">
+                    @endforeach
+                </div>
+            @endif
 
                   <div class="flex items-center justify-between pt-4 border-t border-gray-200">
-    {{-- 왼쪽: 목록으로 --}}
-    <a href="{{ route('posts.index') }}" 
+    {{-- 左：一覧へ --}}
+    <a href="{{ route('posts.index') }}"
        class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none transition">
-        ← 목록으로
+        ← 一覧へ
     </a>
 
-    {{-- 오른쪽: 좋아요 + 수정 + 삭제 --}}
+    {{-- 右：いいね + 編集 + 削除 --}}
     <div class="flex items-center space-x-3">
-        {{-- 좋아요 버튼 --}}
+        {{-- いいねボタン --}}
         @auth
             <form action="{{ route('posts.like', $post) }}" method="POST" class="inline">
                 @csrf
@@ -63,25 +80,25 @@
             </div>
         @endauth
 
-        {{-- 수정 버튼 (작성자만) --}}
+        {{-- 編集ボタン（投稿者のみ） --}}
         @can('update', $post)
-            <a href="{{ route('posts.edit', $post) }}" 
+            <a href="{{ route('posts.edit', $post) }}"
                class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-600 focus:outline-none transition">
-                수정
+                編集
             </a>
         @endcan
-        
-        {{-- 삭제 버튼 (작성자만) --}}
+
+        {{-- 削除ボタン（投稿者のみ） --}}
         @can('delete', $post)
-            <form action="{{ route('posts.destroy', $post) }}" 
-                  method="POST" 
+            <form action="{{ route('posts.destroy', $post) }}"
+                  method="POST"
                   class="inline"
-                  onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                  onsubmit="return confirm('本当に削除しますか？');">
                 @csrf
                 @method('DELETE')
-                <button type="submit" 
+                <button type="submit"
                         class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:outline-none transition">
-                    삭제
+                    削除
                 </button>
             </form>
         @endcan
@@ -91,38 +108,38 @@
                 </div>
             </div>
 
-{{-- 댓글 영역 --}}
+{{-- コメントエリア --}}
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
                     <h3 class="text-lg font-bold mb-4">
-                        💬 댓글 ({{ $post->comments->count() }})
+                        💬 コメント ({{ $post->comments->count() }})
                     </h3>
 
-                    {{-- 댓글 작성 폼 --}}
+                    {{-- コメント投稿フォーム --}}
                     <form action="{{ route('comments.store', $post) }}" method="POST" class="mb-6">
                         @csrf
-                        <textarea name="content" 
-                                  rows="3" 
-                                  placeholder="댓글을 작성해주세요..."
+                        <textarea name="content"
+                                  rows="3"
+                                  placeholder="コメントを入力してください..."
                                   class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">{{ old('content') }}</textarea>
                         @error('content')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
-                        
+
                         <div class="mt-2 text-right">
-                            <button type="submit" 
+                            <button type="submit"
                                     class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-medium text-sm text-white hover:bg-indigo-700 focus:outline-none transition">
-                                댓글 작성
+                                コメント投稿
                             </button>
                         </div>
                     </form>
 
-                    {{-- 댓글 목록 --}}
+                    {{-- コメント一覧 --}}
                     <div class="space-y-3 bg-gray-50 p-4 rounded-lg">
                         @forelse($post->comments as $comment)
                             <div class="bg-white border border-gray-200 p-4 rounded-lg shadow-sm">
-                                {{-- 댓글 헤더 --}}
+                                {{-- コメントヘッダー --}}
                                 <div class="flex justify-between items-center mb-3">
                                     <div class="flex items-center">
                                         <span class="font-medium text-sm text-gray-800">
@@ -132,28 +149,26 @@
                                             {{ $comment->created_at->format('Y-m-d H:i') }}
                                         </span>
                                     </div>
-                                    
+
                                     @can('delete', $comment)
-                                        <form action="{{ route('comments.destroy', $comment) }}" 
-                                              method="POST" 
+                                        <form action="{{ route('comments.destroy', $comment) }}"
+                                              method="POST"
                                               class="inline"
-                                              onsubmit="return confirm('댓글을 삭제하시겠습니까?');">
+                                              onsubmit="return confirm('コメントを削除しますか？');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" 
+                                            <button type="submit"
                                                     class="text-xs text-red-500 hover:text-red-700 px-2 py-1">
-                                                삭제
+                                                削除
                                             </button>
                                         </form>
                                     @endcan
                                 </div>
-                                
-                                {{-- 댓글 본문 --}}
-                              <div class="text-sm text-gray-700 whitespace-pre-wrap mb-3" style="text-align: left !important; padding: 0; margin: 0;">
-                                {{ $comment->content }}
-                            </div>
-                                
-                                {{-- 댓글 좋아요 버튼 --}}
+
+                                {{-- コメント本文 --}}
+                                <div class="text-sm text-gray-700 whitespace-pre-wrap mb-3">{{ $comment->content }}</div>
+
+                                {{-- コメントいいねボタン --}}
                                 <div>
                                     @auth
                                         <form action="{{ route('comments.like', $comment) }}" method="POST" class="inline">
@@ -177,7 +192,7 @@
                             </div>
                         @empty
                             <p class="text-center text-gray-500 py-8">
-                                아직 댓글이 없습니다. 첫 댓글을 작성해주세요!
+                                まだコメントがありません。最初のコメントを投稿してください！
                             </p>
                         @endforelse
                     </div>
